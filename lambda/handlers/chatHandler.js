@@ -1,6 +1,8 @@
 const { checkTokenLimit, addTokens } = require('../services/tokenTracker');
 const { chat } = require('../services/openaiService');
 
+const MAX_HISTORY_LENGTH = 6; // Keep last 3 exchanges (6 messages: 3 user + 3 assistant)
+
 const ChatIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -26,8 +28,28 @@ const ChatIntentHandler = {
                     .getResponse();
             }
 
-            const chatResponse = await chat([{ role: 'user', content: query }], userId);
+            // Get conversation history from session
+            const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+            const conversationHistory = sessionAttributes.conversationHistory || [];
+
+            // Add user message to history
+            conversationHistory.push({ role: 'user', content: query });
+
+            // Send conversation history to GPT
+            const chatResponse = await chat(conversationHistory, userId);
             await addTokens(userId, chatResponse.tokensUsed);
+
+            // Add assistant response to history
+            conversationHistory.push({ role: 'assistant', content: chatResponse.response });
+
+            // Keep only recent history to manage token usage
+            while (conversationHistory.length > MAX_HISTORY_LENGTH) {
+                conversationHistory.shift();
+            }
+
+            // Save updated history to session
+            sessionAttributes.conversationHistory = conversationHistory;
+            handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 
             return handlerInput.responseBuilder
                 .speak(chatResponse.response)
