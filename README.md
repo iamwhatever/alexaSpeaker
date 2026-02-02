@@ -126,7 +126,15 @@ sam build
 sam deploy
 ```
 
-Save the **Lambda ARN** from the output - you'll need it for Alexa configuration.
+After deployment, note the output:
+```
+Key                 AlexaSpeakerFunctionArn
+Value               arn:aws:lambda:us-east-1:123456789:function:alexa-chatgpt-skill-AlexaSpeakerFunction-AbCdEfGh
+```
+
+Save both:
+- **Lambda ARN**: The full `arn:aws:lambda:...` value (for Alexa endpoint)
+- **Function name**: The part after `function:` (e.g., `alexa-chatgpt-skill-AlexaSpeakerFunction-AbCdEfGh`)
 
 ### 5. Create Alexa Skill
 
@@ -136,16 +144,20 @@ Save the **Lambda ARN** from the output - you'll need it for Alexa configuration
 4. Click **Save Model** then **Build Model**
 5. Go to **Endpoint**, select **AWS Lambda ARN**, paste your Lambda ARN
 6. Copy your **Skill ID** (click "View Skill ID" at top)
-7. Add Alexa permission to invoke your Lambda:
+7. Add Alexa permission to invoke your Lambda (run this locally - it updates AWS):
 
 ```bash
 aws lambda add-permission \
-  --function-name <your-lambda-function-name> \
+  --function-name alexa-chatgpt-skill-AlexaSpeakerFunction-AbCdEfGh \
   --statement-id alexa-skill \
   --action lambda:InvokeFunction \
   --principal alexa-appkit.amazon.com \
-  --event-source-token <your-skill-id>
+  --event-source-token amzn1.ask.skill.xxxx-xxxx-xxxx
 ```
+
+Replace:
+- `alexa-chatgpt-skill-AlexaSpeakerFunction-AbCdEfGh` → your function name from step 4
+- `amzn1.ask.skill.xxxx-xxxx-xxxx` → your Skill ID from step 6
 
 8. Test in the Alexa Developer Console **Test** tab
 
