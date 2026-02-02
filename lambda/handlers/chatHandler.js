@@ -1,8 +1,8 @@
 const { checkTokenLimit, addTokens } = require('../services/tokenTracker');
 const { chat, summarizeConversation } = require('../services/openaiService');
 
-const MAX_RECENT_MESSAGES = 4; // Keep last 2 exchanges (4 messages)
-const SUMMARIZE_THRESHOLD = 8; // Summarize when history exceeds this
+const KEEP_RECENT_MESSAGES = 4; // Keep last 2 exchanges after summarizing
+const MAX_NEW_MESSAGES = 10;    // Summarize when new messages (since last summary) exceed this
 
 const ChatIntentHandler = {
     canHandle(handlerInput) {
@@ -54,27 +54,30 @@ const ChatIntentHandler = {
             // Add assistant response to history
             conversationHistory.push({ role: 'assistant', content: chatResponse.response });
 
-            // Summarize if history gets too long
-            if (conversationHistory.length > SUMMARIZE_THRESHOLD) {
+            // Summarize if new messages (since last summary) exceed threshold
+            // Summary acts as "message 0", conversationHistory tracks new messages only
+            if (conversationHistory.length >= MAX_NEW_MESSAGES) {
                 try {
-                    // Get messages to summarize (all except last 2 exchanges)
-                    const toSummarize = conversationHistory.slice(0, -MAX_RECENT_MESSAGES);
-                    const recentMessages = conversationHistory.slice(-MAX_RECENT_MESSAGES);
+                    // Summarize all except last 2 exchanges
+                    const toSummarize = conversationHistory.slice(0, -KEEP_RECENT_MESSAGES);
+                    const recentMessages = conversationHistory.slice(-KEEP_RECENT_MESSAGES);
 
-                    // Create summary of older conversation
-                    const existingSummary = sessionAttributes.conversationSummary || '';
-                    const summaryResult = await summarizeConversation(toSummarize, existingSummary);
+                    // Create/update summary (incorporates existing summary if any)
+                    const summaryResult = await summarizeConversation(toSummarize, conversationSummary);
 
-                    // Update session with summary and recent messages only
+                    // Reset: summary holds old context, history holds only recent messages
                     sessionAttributes.conversationSummary = summaryResult.summary;
                     sessionAttributes.conversationHistory = recentMessages;
                     await addTokens(userId, summaryResult.tokensUsed);
+
+                    console.log(`Summarized conversation. New summary: ${summaryResult.summary}`);
                 } catch (error) {
                     console.error('Summarization error:', error);
                     // Fall back to just keeping recent messages
-                    sessionAttributes.conversationHistory = conversationHistory.slice(-MAX_RECENT_MESSAGES);
+                    sessionAttributes.conversationHistory = conversationHistory.slice(-KEEP_RECENT_MESSAGES);
                 }
             } else {
+                // Under threshold, keep all new messages
                 sessionAttributes.conversationHistory = conversationHistory;
             }
 
