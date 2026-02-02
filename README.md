@@ -1,15 +1,17 @@
 # Alexa ChatGPT Skill - Snowball
 
-A personal AI voice assistant for Alexa, powered by OpenAI's GPT models. Ask "Snowball" any question and get conversational responses.
+A personal AI voice assistant for Alexa, powered by OpenAI's GPT models. Have natural conversations - just ask questions like "what is the moon" or "tell me about dinosaurs".
 
 ## Features
 
+- **Natural conversation** - Just ask "what is X" or "tell me about Y" - no special commands needed
 - **Voice AI assistant** - Talk to "Snowball" through Alexa
 - **Fast responses** - Uses GPT-5-nano optimized for voice (1-2 second responses)
+- **Kid-friendly** - Great for children's questions, safe and educational
 - **Daily token limit** - Configurable per-user limits to control costs
 - **Automatic reset** - Token usage resets at midnight (timezone-aware)
 - **Retry logic** - Automatic retries for reliable responses
-- **Serverless** - AWS Lambda + DynamoDB, minimal cost
+- **Serverless** - AWS Lambda + DynamoDB, minimal cost (~$0.60/month max)
 
 ## Architecture
 
@@ -197,11 +199,14 @@ Once deployed, say to your Alexa device:
 "Alexa, open chat assistant"
 → "Hi, I'm Snowball. What would you like to know?"
 
-"Snowball, what is the capital of France"
+"What is the capital of France"
 → "The capital of France is Paris..."
 
-"Snowball, tell me a fun fact about space"
-→ "Here's a fun fact..."
+"Tell me about dinosaurs"
+→ "Dinosaurs were..."
+
+"Why is the sky blue"
+→ "The sky appears blue because..."
 
 "Stop"
 → "Goodbye."
@@ -209,15 +214,22 @@ Once deployed, say to your Alexa device:
 
 ### Supported Phrases
 
-You can speak naturally:
+Speak naturally with these patterns:
 
-- `what is {topic}` - "what is the moon"
-- `tell me about {topic}` - "tell me about Paris"
-- `who is {person}` - "who is Einstein"
-- `why is {question}` - "why is the sky blue"
-- `how do {question}` - "how do airplanes fly"
-- `explain {topic}` - "explain gravity"
-- `Snowball, {question}` - Also works with the assistant name
+| Pattern | Example |
+|---------|---------|
+| `what is {topic}` | "what is the moon" |
+| `what are {topic}` | "what are black holes" |
+| `tell me about {topic}` | "tell me about Paris" |
+| `who is {person}` | "who is Einstein" |
+| `where is {place}` | "where is Tokyo" |
+| `when was {event}` | "when was World War 2" |
+| `why is {question}` | "why is the sky blue" |
+| `how do {question}` | "how do airplanes fly" |
+| `how to {action}` | "how to make pancakes" |
+| `explain {topic}` | "explain gravity" |
+| `can you {request}` | "can you tell me a joke" |
+| `Snowball, {question}` | "Snowball, what's the weather" |
 
 ## Testing on Real Devices
 
