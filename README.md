@@ -25,6 +25,23 @@ User (Alexa) → Lambda → OpenAI API
 - [OpenAI API key](https://platform.openai.com/api-keys)
 - [Amazon Developer Account](https://developer.amazon.com/) for Alexa skill
 
+### Install Tools (macOS)
+
+```bash
+# Install Homebrew (if not installed)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install required tools
+brew install awscli aws-sam-cli node
+
+# Verify installations
+aws --version
+sam --version
+node --version
+```
+
+For other platforms, see [AWS CLI Install Guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and [SAM CLI Install Guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html).
+
 ## Quick Start
 
 ### 1. Clone and Install
