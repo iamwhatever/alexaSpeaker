@@ -12,16 +12,20 @@
             }
           ],
           "samples": [
-            "{query}",
             "ask {query}",
             "tell me {query}",
+            "tell me about {query}",
             "I want to know {query}",
             "can you tell me {query}",
             "what is {query}",
+            "what about {query}",
             "explain {query}",
             "help me with {query}",
             "I have a question about {query}",
-            "please answer {query}"
+            "please answer {query}",
+            "answer {query}",
+            "search for {query}",
+            "look up {query}"
           ]
         },
         {
