@@ -9,7 +9,7 @@ Parameters:
     NoEcho: true
   DailyTokenLimit:
     Type: String
-    Default: '10000'
+    Default: '50000'
     Description: Maximum tokens allowed per user per day
   UserTimezone:
     Type: String

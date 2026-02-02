@@ -20,7 +20,7 @@ resolve_s3 = true
 # Fill in your configuration values below
 parameter_overrides = [
     "OpenAIApiKey=sk-your-openai-api-key-here",
-    "DailyTokenLimit=10000",
+    "DailyTokenLimit=50000",
     "UserTimezone=America/Los_Angeles"
 ]
 

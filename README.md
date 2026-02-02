@@ -81,7 +81,7 @@ Edit `samconfig.toml` with your OpenAI API key (get one from [OpenAI Platform](h
 ```toml
 parameter_overrides = [
     "OpenAIApiKey=sk-your-actual-openai-api-key",
-    "DailyTokenLimit=10000",
+    "DailyTokenLimit=50000",
     "UserTimezone=America/Los_Angeles"
 ]
 ```
@@ -89,7 +89,7 @@ parameter_overrides = [
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `OpenAIApiKey` | Your OpenAI API key ([get one here](https://platform.openai.com/api-keys)) | (required) |
-| `DailyTokenLimit` | Max tokens per user per day | `10000` |
+| `DailyTokenLimit` | Max tokens per user per day | `50000` |
 | `UserTimezone` | Timezone for daily reset | `America/Los_Angeles` |
 
 ### 4. Deploy
