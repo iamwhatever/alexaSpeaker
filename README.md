@@ -30,12 +30,28 @@ User (Alexa) → Lambda → OpenAI API
 ### 1. Clone and Install
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/iamwhatever/alexaSpeaker.git
 cd alexaSpeaker
 npm install
 ```
 
-### 2. Configure
+### 2. Configure AWS Credentials
+
+If you haven't configured AWS CLI yet, run:
+
+```bash
+aws configure
+```
+
+Enter your AWS credentials:
+- **AWS Access Key ID**: Your IAM user access key
+- **AWS Secret Access Key**: Your IAM user secret key
+- **Default region**: `us-east-1` (required for Alexa skills)
+- **Default output format**: `json`
+
+To get AWS access keys, create an IAM user in [AWS Console](https://console.aws.amazon.com/iam/) with `AdministratorAccess` permission.
+
+### 3. Configure App Settings
 
 Copy the example config and fill in your credentials:
 
@@ -43,7 +59,7 @@ Copy the example config and fill in your credentials:
 cp samconfig.example.toml samconfig.toml
 ```
 
-Edit `samconfig.toml`:
+Edit `samconfig.toml` with your OpenAI API key (get one from [OpenAI Platform](https://platform.openai.com/api-keys)):
 
 ```toml
 parameter_overrides = [
@@ -55,11 +71,11 @@ parameter_overrides = [
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `OpenAIApiKey` | Your OpenAI API key | (required) |
+| `OpenAIApiKey` | Your OpenAI API key ([get one here](https://platform.openai.com/api-keys)) | (required) |
 | `DailyTokenLimit` | Max tokens per user per day | `10000` |
 | `UserTimezone` | Timezone for daily reset | `America/Los_Angeles` |
 
-### 3. Deploy
+### 4. Deploy
 
 ```bash
 sam build
@@ -68,13 +84,26 @@ sam deploy
 
 Save the **Lambda ARN** from the output - you'll need it for Alexa configuration.
 
-### 4. Create Alexa Skill
+### 5. Create Alexa Skill
 
 1. Go to [Alexa Developer Console](https://developer.amazon.com/alexa/console/ask)
-2. Create a new Custom skill
-3. Import the interaction model from `skill-package/interactionModels/custom/en-US.json`
-4. Set the endpoint to your Lambda ARN
-5. Build and test
+2. Create a new Custom skill (name: "Chat Assistant", model: Custom, hosting: Provision your own)
+3. In **JSON Editor**, paste contents of `skill-package/interactionModels/custom/en-US.json`
+4. Click **Save Model** then **Build Model**
+5. Go to **Endpoint**, select **AWS Lambda ARN**, paste your Lambda ARN
+6. Copy your **Skill ID** (click "View Skill ID" at top)
+7. Add Alexa permission to invoke your Lambda:
+
+```bash
+aws lambda add-permission \
+  --function-name <your-lambda-function-name> \
+  --statement-id alexa-skill \
+  --action lambda:InvokeFunction \
+  --principal alexa-appkit.amazon.com \
+  --event-source-token <your-skill-id>
+```
+
+8. Test in the Alexa Developer Console **Test** tab
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed step-by-step instructions.
 
