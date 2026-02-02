@@ -207,17 +207,17 @@ Once deployed, say to your Alexa device:
 → "Goodbye."
 ```
 
-**Important:** Start your questions with "Snowball" - this tells the skill to send your query to GPT.
-
 ### Supported Phrases
 
-- `Snowball, {question}` - Main pattern
-- `Hey Snowball, {question}`
-- `Snowball, what is {topic}`
-- `Snowball, who is {person}`
-- `Snowball, why is {question}`
-- `Snowball, how do {question}`
-- `Snowball, explain {topic}`
+You can speak naturally:
+
+- `what is {topic}` - "what is the moon"
+- `tell me about {topic}` - "tell me about Paris"
+- `who is {person}` - "who is Einstein"
+- `why is {question}` - "why is the sky blue"
+- `how do {question}` - "how do airplanes fly"
+- `explain {topic}` - "explain gravity"
+- `Snowball, {question}` - Also works with the assistant name
 
 ## Testing on Real Devices
 
@@ -246,11 +246,11 @@ Development mode = Only your Amazon account can use it.
 |------------|------------------|
 | **8-second timeout** | Use fast model (gpt-5-nano), retry logic |
 | **~8000 char speech limit** | System prompt asks for short responses, truncation safety net |
-| **Utterance patterns** | Must say "Snowball" + query (can't be freeform) |
+| **Utterance patterns** | Need carrier phrases like "what is", "tell me about" |
 
-### Why "Snowball" prefix?
+### About Utterance Patterns
 
-Alexa requires utterance patterns with "carrier phrases". We can't just capture freeform speech. Using "Snowball, {query}" lets you ask anything after the keyword.
+Alexa requires utterance patterns with "carrier phrases" - you can't just say anything freeform. We support many natural patterns like "what is X", "tell me about X", "why is X", etc. You can also use "Snowball, X" as a catch-all.
 
 ### Response Speed vs Quality
 
