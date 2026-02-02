@@ -4,11 +4,11 @@ const HelpIntentHandler = {
             && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
     },
     handle(handlerInput) {
-        const speakOutput = "You can ask me any question and I'll use ChatGPT to answer. Just say what's on your mind. What would you like to know?";
+        const speakOutput = "I'm Snowball, your AI assistant. Start your question with 'Snowball' followed by what you want to know. For example, say 'Snowball, what is the moon?'";
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
-            .reprompt(speakOutput)
+            .reprompt("Say 'Snowball' followed by your question.")
             .getResponse();
     }
 };
@@ -35,11 +35,11 @@ const FallbackIntentHandler = {
             && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.FallbackIntent';
     },
     handle(handlerInput) {
-        const speakOutput = "I didn't catch that. Try asking a question.";
+        const speakOutput = "Please start your question with 'Snowball'. For example, say 'Snowball, tell me about dinosaurs'.";
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
-            .reprompt(speakOutput)
+            .reprompt("Say 'Snowball' followed by your question.")
             .getResponse();
     }
 };

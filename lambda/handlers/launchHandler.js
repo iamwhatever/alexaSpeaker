@@ -4,8 +4,8 @@ const LaunchRequestHandler = {
     },
     handle(handlerInput) {
         return handlerInput.responseBuilder
-            .speak('Ready.')
-            .reprompt('What would you like to know?')
+            .speak("Hi, I'm Snowball. What would you like to know?")
+            .reprompt("Say 'Snowball' followed by your question.")
             .getResponse();
     }
 };
