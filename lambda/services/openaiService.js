@@ -66,6 +66,42 @@ async function chat(messages, userId, retries = 2) {
   }
 }
 
+/**
+ * Summarize conversation history to compress context
+ * @param {Array<{role: string, content: string}>} messages - Messages to summarize
+ * @param {string} existingSummary - Previous summary to incorporate
+ * @returns {Promise<{summary: string, tokensUsed: number}>}
+ */
+async function summarizeConversation(messages, existingSummary = '') {
+  const conversationText = messages
+    .map(m => `${m.role}: ${m.content}`)
+    .join('\n');
+
+  const prompt = existingSummary
+    ? `Previous summary: ${existingSummary}\n\nNew conversation:\n${conversationText}\n\nCreate a brief updated summary (2-3 sentences) capturing key topics and context.`
+    : `Conversation:\n${conversationText}\n\nCreate a brief summary (2-3 sentences) capturing key topics and context.`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'You are a summarizer. Create very brief summaries of conversations.' },
+        { role: 'user', content: prompt }
+      ],
+      max_tokens: 100,
+    });
+
+    const summary = completion.choices[0]?.message?.content || existingSummary;
+    const tokensUsed = (completion.usage?.prompt_tokens || 0) + (completion.usage?.completion_tokens || 0);
+
+    return { summary, tokensUsed };
+  } catch (error) {
+    console.error('Summarization error:', error.message);
+    return { summary: existingSummary, tokensUsed: 0 };
+  }
+}
+
 module.exports = {
   chat,
+  summarizeConversation,
 };

@@ -1,7 +1,8 @@
 const { checkTokenLimit, addTokens } = require('../services/tokenTracker');
-const { chat } = require('../services/openaiService');
+const { chat, summarizeConversation } = require('../services/openaiService');
 
-const MAX_HISTORY_LENGTH = 6; // Keep last 3 exchanges (6 messages: 3 user + 3 assistant)
+const MAX_RECENT_MESSAGES = 4; // Keep last 2 exchanges (4 messages)
+const SUMMARIZE_THRESHOLD = 8; // Summarize when history exceeds this
 
 const ChatIntentHandler = {
     canHandle(handlerInput) {
@@ -28,27 +29,56 @@ const ChatIntentHandler = {
                     .getResponse();
             }
 
-            // Get conversation history from session
+            // Get conversation history and summary from session
             const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
             const conversationHistory = sessionAttributes.conversationHistory || [];
+            const conversationSummary = sessionAttributes.conversationSummary || '';
 
             // Add user message to history
             conversationHistory.push({ role: 'user', content: query });
 
+            // Build messages with summary context if available
+            let messagesToSend = [...conversationHistory];
+            if (conversationSummary) {
+                // Prepend summary as context
+                messagesToSend = [
+                    { role: 'system', content: `Previous conversation summary: ${conversationSummary}` },
+                    ...conversationHistory
+                ];
+            }
+
             // Send conversation history to GPT
-            const chatResponse = await chat(conversationHistory, userId);
+            const chatResponse = await chat(messagesToSend, userId);
             await addTokens(userId, chatResponse.tokensUsed);
 
             // Add assistant response to history
             conversationHistory.push({ role: 'assistant', content: chatResponse.response });
 
-            // Keep only recent history to manage token usage
-            while (conversationHistory.length > MAX_HISTORY_LENGTH) {
-                conversationHistory.shift();
+            // Summarize if history gets too long
+            if (conversationHistory.length > SUMMARIZE_THRESHOLD) {
+                try {
+                    // Get messages to summarize (all except last 2 exchanges)
+                    const toSummarize = conversationHistory.slice(0, -MAX_RECENT_MESSAGES);
+                    const recentMessages = conversationHistory.slice(-MAX_RECENT_MESSAGES);
+
+                    // Create summary of older conversation
+                    const existingSummary = sessionAttributes.conversationSummary || '';
+                    const summaryResult = await summarizeConversation(toSummarize, existingSummary);
+
+                    // Update session with summary and recent messages only
+                    sessionAttributes.conversationSummary = summaryResult.summary;
+                    sessionAttributes.conversationHistory = recentMessages;
+                    await addTokens(userId, summaryResult.tokensUsed);
+                } catch (error) {
+                    console.error('Summarization error:', error);
+                    // Fall back to just keeping recent messages
+                    sessionAttributes.conversationHistory = conversationHistory.slice(-MAX_RECENT_MESSAGES);
+                }
+            } else {
+                sessionAttributes.conversationHistory = conversationHistory;
             }
 
-            // Save updated history to session
-            sessionAttributes.conversationHistory = conversationHistory;
+            // Save to session
             handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 
             return handlerInput.responseBuilder
