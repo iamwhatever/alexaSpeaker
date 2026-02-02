@@ -54,20 +54,16 @@ For other platforms, see [AWS CLI Install Guide](https://docs.aws.amazon.com/cli
 
 ## Model Choices
 
-This skill uses `gpt-5-mini` by default. You can change the model in `lambda/services/openaiService.js`:
+This skill uses `gpt-5-nano` by default for fast voice responses. You can change the model in `lambda/services/openaiService.js`:
 
 | Model | Best For | Speed | Cost (per 1M tokens) |
 |-------|----------|-------|---------------------|
-| `gpt-5-nano` | Simple chat, cheapest | Fastest | $0.05 / $0.40 |
-| `gpt-5-mini` | **Recommended** - good balance | Fast | $0.25 / $2.00 |
+| `gpt-5-nano` | **Recommended for voice** - fast responses | Fastest | $0.05 / $0.40 |
+| `gpt-5-mini` | Better quality, slightly slower | Fast | $0.25 / $2.00 |
 | `gpt-5` | Expert-level responses | Medium | $1.25 / $10.00 |
 | `gpt-5.2` | Complex tasks, coding | Slower | $2.50 / $15.00 |
 
-To change the model, edit line 15 in `lambda/services/openaiService.js`:
-
-```javascript
-model: 'gpt-5-mini',  // Change to gpt-5-nano, gpt-5, or gpt-5.2
-```
+For voice assistants, faster is better - Alexa has an 8-second timeout.
 
 ## Quick Start
 
@@ -215,11 +211,11 @@ Once deployed and linked to your Alexa device:
 |---------|-----------|--------------|
 | AWS Lambda | 1M requests/month | $0 |
 | DynamoDB | 25 GB storage | $0 |
-| OpenAI gpt-5-mini | None | ~$1-3/month |
+| OpenAI gpt-5-nano | None | ~$0.20-0.60/month |
 
 **Cost estimate with default settings (50,000 tokens/day limit):**
-- Light usage: ~$0.50/month
-- Heavy usage (hitting daily limit): ~$3/month
+- Light usage: ~$0.10/month
+- Heavy usage (hitting daily limit): ~$0.60/month
 
 ## Updating
 

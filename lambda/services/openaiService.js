@@ -28,9 +28,9 @@ async function chat(messages, userId, retries = 2) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       const completion = await openai.chat.completions.create({
-        model: 'gpt-5-mini',
+        model: 'gpt-5-nano',
         messages: messagesWithSystem,
-        max_completion_tokens: 500,
+        max_completion_tokens: 250, // Keep responses short for voice
       });
 
       let response = completion.choices[0]?.message?.content || '';
