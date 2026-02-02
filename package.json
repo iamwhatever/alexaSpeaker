@@ -1,0 +1,21 @@
+{
+  "name": "alexa-chatgpt-skill",
+  "version": "1.0.0",
+  "description": "Alexa skill that connects to ChatGPT with daily token limits",
+  "main": "lambda/index.js",
+  "scripts": {
+    "build": "sam build",
+    "deploy": "sam deploy --guided",
+    "local": "sam local invoke"
+  },
+  "dependencies": {
+    "ask-sdk-core": "^2.14.0",
+    "ask-sdk-model": "^1.86.0",
+    "@aws-sdk/client-dynamodb": "^3.400.0",
+    "@aws-sdk/lib-dynamodb": "^3.400.0",
+    "openai": "^4.20.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Alexa Speaker Lambda function with DynamoDB for token usage tracking
+
+Parameters:
+  OpenAIApiKey:
+    Type: String
+    Description: Your OpenAI API key
+    NoEcho: true
+  DailyTokenLimit:
+    Type: String
+    Default: '10000'
+    Description: Maximum tokens allowed per user per day
+  UserTimezone:
+    Type: String
+    Default: 'America/Los_Angeles'
+    Description: Default timezone for token reset calculation
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: nodejs18.x
+
+Resources:
+  AlexaSpeakerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda/index.handler
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref AlexaChatTokenUsageTable
+          DAILY_TOKEN_LIMIT: !Ref DailyTokenLimit
+          USER_TIMEZONE: !Ref UserTimezone
+          OPENAI_API_KEY: !Ref OpenAIApiKey
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AlexaChatTokenUsageTable
+      Events:
+        AlexaSkill:
+          Type: AlexaSkill
+
+  AlexaChatTokenUsageTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: AlexaChatTokenUsage
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+Outputs:
+  AlexaSpeakerFunctionArn:
+    Description: ARN of the Alexa Speaker Lambda function (needed for Alexa skill configuration)
+    Value: !GetAtt AlexaSpeakerFunction.Arn

@@ -1,0 +1,28 @@
+# SAM Configuration File
+# Copy this file to samconfig.toml and fill in your values
+# IMPORTANT: Never commit samconfig.toml - it contains sensitive credentials
+
+version = 0.1
+
+[default.global.parameters]
+stack_name = "alexa-chatgpt-skill"
+region = "us-east-1"
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+resolve_s3 = true
+
+# Fill in your configuration values below
+parameter_overrides = [
+    "OpenAIApiKey=sk-your-openai-api-key-here",
+    "DailyTokenLimit=10000",
+    "UserTimezone=America/Los_Angeles"
+]
+
+[default.local_invoke.parameters]
+env_vars = "env.json"
