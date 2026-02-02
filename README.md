@@ -42,6 +42,33 @@ node --version
 
 For other platforms, see [AWS CLI Install Guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and [SAM CLI Install Guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html).
 
+### Get OpenAI API Key
+
+**Note:** OpenAI API is separate from ChatGPT Plus subscription. API access requires separate billing.
+
+1. Go to [platform.openai.com](https://platform.openai.com) (not chat.openai.com)
+2. Sign up or log in
+3. Go to **Settings** → **Billing** → Add payment method and add credits (minimum $5)
+4. Go to **API Keys** → Click **Create new secret key**
+5. Copy the key (starts with `sk-`) - it's only shown once!
+
+## Model Choices
+
+This skill uses `gpt-5-mini` by default. You can change the model in `lambda/services/openaiService.js`:
+
+| Model | Best For | Speed | Cost (per 1M tokens) |
+|-------|----------|-------|---------------------|
+| `gpt-5-nano` | Simple chat, cheapest | Fastest | $0.05 / $0.40 |
+| `gpt-5-mini` | **Recommended** - good balance | Fast | $0.25 / $2.00 |
+| `gpt-5` | Expert-level responses | Medium | $1.25 / $10.00 |
+| `gpt-5.2` | Complex tasks, coding | Slower | $2.50 / $15.00 |
+
+To change the model, edit line 15 in `lambda/services/openaiService.js`:
+
+```javascript
+model: 'gpt-5-mini',  // Change to gpt-5-nano, gpt-5, or gpt-5.2
+```
+
 ## Quick Start
 
 ### 1. Clone and Install
@@ -176,7 +203,11 @@ Once deployed and linked to your Alexa device:
 |---------|-----------|--------------|
 | AWS Lambda | 1M requests/month | $0 |
 | DynamoDB | 25 GB storage | $0 |
-| OpenAI GPT-3.5 | None | ~$0.50-5/month |
+| OpenAI gpt-5-mini | None | ~$1-3/month |
+
+**Cost estimate with default settings (50,000 tokens/day limit):**
+- Light usage: ~$0.50/month
+- Heavy usage (hitting daily limit): ~$3/month
 
 ## Updating
 
