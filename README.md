@@ -5,8 +5,10 @@ A personal AI voice assistant for Alexa, powered by OpenAI's GPT models. Have na
 ## Features
 
 - **Natural conversation** - Just ask "what is X" or "tell me about Y" - no special commands needed
+- **Conversation memory** - Remembers context for follow-up questions ("tell me more", "why is that")
+- **Smart summarization** - Older messages are summarized to allow longer conversations
 - **Voice AI assistant** - Talk to "Snowball" through Alexa
-- **Fast responses** - Uses GPT-5-nano optimized for voice (1-2 second responses)
+- **Fast responses** - Uses gpt-4o-mini optimized for voice (1-2 second responses)
 - **Kid-friendly** - Great for children's questions, safe and educational
 - **Daily token limit** - Configurable per-user limits to control costs
 - **Automatic reset** - Token usage resets at midnight (timezone-aware)
@@ -58,14 +60,13 @@ For other platforms, see [AWS CLI Install Guide](https://docs.aws.amazon.com/cli
 
 ## Model Choices
 
-This skill uses `gpt-5-nano` by default for fast voice responses. You can change the model in `lambda/services/openaiService.js`:
+This skill uses `gpt-4o-mini` by default - fast and reliable. You can change the model in `lambda/services/openaiService.js`:
 
 | Model | Best For | Speed | Cost (per 1M tokens) |
 |-------|----------|-------|---------------------|
-| `gpt-5-nano` | **Recommended for voice** - fast responses | Fastest | $0.05 / $0.40 |
-| `gpt-5-mini` | Better quality, slightly slower | Fast | $0.25 / $2.00 |
-| `gpt-5` | Expert-level responses | Medium | $1.25 / $10.00 |
-| `gpt-5.2` | Complex tasks, coding | Slower | $2.50 / $15.00 |
+| `gpt-4o-mini` | **Recommended** - fast, reliable, good quality | Fast | $0.15 / $0.60 |
+| `gpt-4o` | Better quality | Medium | $2.50 / $10.00 |
+| `gpt-4-turbo` | Complex reasoning | Slower | $10.00 / $30.00 |
 
 For voice assistants, faster is better - Alexa has an 8-second timeout.
 
@@ -231,6 +232,37 @@ Speak naturally with these patterns:
 | `can you {request}` | "can you tell me a joke" |
 | `Snowball, {question}` | "Snowball, what's the weather" |
 
+## Conversation Memory
+
+Snowball remembers your conversation context, allowing natural follow-ups:
+
+```
+"What is the Great Wall of China"
+→ "The Great Wall is a series of fortifications..."
+
+"How long is it"                    ← Knows "it" = Great Wall
+→ "It stretches about 13,000 miles..."
+
+"When was it built"                 ← Still has context
+→ "Construction began in the 7th century BC..."
+```
+
+### How It Works
+
+| Messages | What Happens |
+|----------|--------------|
+| 1-9 | All messages kept in full |
+| 10+ | Older messages summarized, recent 4 kept |
+| Ongoing | Summary updated, recent context preserved |
+
+### Memory Limits
+
+| Scope | Memory Kept? |
+|-------|--------------|
+| Same session | Yes - full context with summarization |
+| After "Stop" | No - resets |
+| After timeout | No - resets |
+
 ## Testing on Real Devices
 
 No publishing needed! Development mode skills are available on your personal devices:
@@ -285,11 +317,11 @@ Alexa requires utterance patterns with "carrier phrases" - you can't just say an
 |---------|-----------|--------------|
 | AWS Lambda | 1M requests/month | $0 |
 | DynamoDB | 25 GB storage | $0 |
-| OpenAI gpt-5-nano | None | ~$0.20-0.60/month |
+| OpenAI gpt-4o-mini | None | ~$0.50-2.00/month |
 
 **Cost estimate with default settings (50,000 tokens/day limit):**
-- Light usage: ~$0.10/month
-- Heavy usage (hitting daily limit): ~$0.60/month
+- Light usage: ~$0.30/month
+- Heavy usage (hitting daily limit): ~$2.00/month
 
 ## Updating
 
