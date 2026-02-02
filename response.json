@@ -1,0 +1,1 @@
+{"version":"1.0","response":{"outputSpeech":{"type":"SSML","ssml":"<speak>Sorry, I couldn't get a response. Please try again.</speak>"},"reprompt":{"outputSpeech":{"type":"SSML","ssml":"<speak>What would you like to know?</speak>"}},"shouldEndSession":false},"userAgent":"ask-node/2.14.0 Node/v18.20.8 alexa-chatgpt-skill/1.0","sessionAttributes":{}}

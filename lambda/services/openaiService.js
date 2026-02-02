@@ -29,7 +29,7 @@ async function chat(messages, userId) {
     const completion = await openai.chat.completions.create({
       model: 'gpt-5-mini',
       messages: messagesWithSystem,
-      max_tokens: 300, // Limit response length
+      max_completion_tokens: 300, // Limit response length
     });
 
     let response = completion.choices[0]?.message?.content || '';
