@@ -29,10 +29,17 @@ async function chat(messages, userId) {
     const completion = await openai.chat.completions.create({
       model: 'gpt-5-mini',
       messages: messagesWithSystem,
-      max_completion_tokens: 300, // Limit response length
+      max_completion_tokens: 500, // Limit response length
     });
 
+    console.log('OpenAI response:', JSON.stringify(completion, null, 2));
+
     let response = completion.choices[0]?.message?.content || '';
+
+    // Handle empty response
+    if (!response || response.trim() === '') {
+      response = "I'm not sure how to answer that. Could you try asking in a different way?";
+    }
 
     // Truncate if still too long (safety net)
     if (response.length > MAX_RESPONSE_LENGTH) {
