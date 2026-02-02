@@ -1,13 +1,15 @@
-# Alexa ChatGPT Skill
+# Alexa ChatGPT Skill - Snowball
 
-An Alexa skill that connects to OpenAI's ChatGPT API, with daily token usage tracking per user.
+A personal AI voice assistant for Alexa, powered by OpenAI's GPT models. Ask "Snowball" any question and get conversational responses.
 
 ## Features
 
-- Voice-based ChatGPT interaction through Alexa
-- Daily token limit per user (configurable)
-- Automatic token reset at midnight (timezone-aware)
-- Serverless architecture (AWS Lambda + DynamoDB)
+- **Voice AI assistant** - Talk to "Snowball" through Alexa
+- **Fast responses** - Uses GPT-5-nano optimized for voice (1-2 second responses)
+- **Daily token limit** - Configurable per-user limits to control costs
+- **Automatic reset** - Token usage resets at midnight (timezone-aware)
+- **Retry logic** - Automatic retries for reliable responses
+- **Serverless** - AWS Lambda + DynamoDB, minimal cost
 
 ## Architecture
 
@@ -189,21 +191,81 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed step-by-step instructions.
 
 ## Usage
 
-Once deployed and linked to your Alexa device:
+Once deployed, say to your Alexa device:
 
 ```
 "Alexa, open chat assistant"
-"What is the capital of France?"
-"Explain quantum computing"
-"Help"
+→ "Hi, I'm Snowball. What would you like to know?"
+
+"Snowball, what is the capital of France"
+→ "The capital of France is Paris..."
+
+"Snowball, tell me a fun fact about space"
+→ "Here's a fun fact..."
+
 "Stop"
+→ "Goodbye."
 ```
+
+**Important:** Start your questions with "Snowball" - this tells the skill to send your query to GPT.
+
+### Supported Phrases
+
+- `Snowball, {question}` - Main pattern
+- `Hey Snowball, {question}`
+- `Snowball, what is {topic}`
+- `Snowball, who is {person}`
+- `Snowball, why is {question}`
+- `Snowball, how do {question}`
+- `Snowball, explain {topic}`
+
+## Testing on Real Devices
+
+No publishing needed! Development mode skills are available on your personal devices:
+
+1. Your Echo/Alexa device must use the **same Amazon account** as your developer account
+2. Skill must be set to **Development** in the Test tab
+3. Just say: "Alexa, open chat assistant"
+
+To verify, open the Alexa app → More → Skills & Games → Your Skills → **Dev** tab
+
+## Keep Skill in Development Mode
+
+**Important:** Keep this skill in Development mode permanently. Do NOT publish it.
+
+If published:
+- Anyone could use your OpenAI API key (your money!)
+- Your AWS resources would serve the public
+- Unexpected bills
+
+Development mode = Only your Amazon account can use it.
+
+## Alexa Limitations & Optimizations
+
+| Limitation | How We Handle It |
+|------------|------------------|
+| **8-second timeout** | Use fast model (gpt-5-nano), retry logic |
+| **~8000 char speech limit** | System prompt asks for short responses, truncation safety net |
+| **Utterance patterns** | Must say "Snowball" + query (can't be freeform) |
+
+### Why "Snowball" prefix?
+
+Alexa requires utterance patterns with "carrier phrases". We can't just capture freeform speech. Using "Snowball, {query}" lets you ask anything after the keyword.
+
+### Response Speed vs Quality
+
+| Factor | Impact |
+|--------|--------|
+| **Model choice** | Biggest impact - gpt-5-nano is fastest |
+| **System prompt** | Tells GPT to keep answers short |
+| `max_completion_tokens` | Cost control only, doesn't speed up responses |
 
 ## Security Notes
 
 - `samconfig.toml` is in `.gitignore` - never commit credentials
 - For production, consider using [AWS Secrets Manager](DEPLOYMENT.md#production-security-with-aws-secrets-manager)
 - OpenAI API key is stored as a Lambda environment variable with `NoEcho` enabled
+- **Never share your API key** - if exposed, regenerate immediately at [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 
 ## Costs
 
@@ -223,6 +285,51 @@ After code changes:
 
 ```bash
 sam build && sam deploy
+```
+
+## Troubleshooting
+
+### "There was a problem with the skill's response"
+
+1. **Check CloudWatch logs:**
+   ```bash
+   aws logs tail /aws/lambda/<your-function-name> --since 10m
+   ```
+
+2. **Common causes:**
+   - OpenAI API key invalid → Regenerate and update
+   - Response too long → System prompt should limit this
+   - Timeout → Model might be slow, consider gpt-5-nano
+
+### Alexa Test Simulator Shows Empty JSON
+
+- Try a **different browser** (Chrome works best)
+- Open in **new tab**: [developer.amazon.com/alexa/console/ask](https://developer.amazon.com/alexa/console/ask)
+- Make sure **Development** mode is selected (not "Off")
+
+### Lambda Never Invoked (No CloudWatch Logs)
+
+1. Verify endpoint ARN is saved in Alexa Console
+2. Verify Lambda permission was added:
+   ```bash
+   aws lambda get-policy --function-name <your-function-name>
+   ```
+3. Skill ID in permission must match your actual skill
+
+### Test Lambda Directly
+
+```bash
+aws lambda invoke \
+  --function-name <your-function-name> \
+  --payload '{"version":"1.0","session":{"new":true,"sessionId":"test","application":{"applicationId":"test"},"user":{"userId":"test"}},"request":{"type":"LaunchRequest","requestId":"test","timestamp":"2024-01-01T00:00:00Z","locale":"en-US"}}' \
+  --cli-binary-format raw-in-base64-out \
+  response.json && cat response.json
+```
+
+### Check Token Usage
+
+```bash
+aws dynamodb scan --table-name AlexaChatTokenUsage
 ```
 
 ## Cleanup
